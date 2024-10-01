@@ -6,6 +6,16 @@ import qrcode.image.svg
 
 # Function to create QR code and return image bytes or SVG string based on format
 def create_qr_code(link, format='JPEG'):
+    """
+    Generates a QR code in the specified format.
+    
+    Args:
+        link (str): The URL or text to encode in the QR code.
+        format (str): The desired format of the QR code ('JPEG', 'PNG', 'SVG').
+    
+    Returns:
+        tuple: A tuple containing the QR code data and its MIME type.
+    """
     # Dynamically select QR code version based on input length
     link_length = len(link)
     
@@ -92,8 +102,9 @@ if st.button("Generate QR Code"):
                 # Display SVG using markdown
                 st.markdown(f'<div>{qr_content}</div>', unsafe_allow_html=True)
             else:
-                # Display PNG or JPEG image
-                st.image(qr_content, caption='Your QR Code', use_column_width=True)
+                # For PNG and JPEG, convert bytes to PIL Image and display
+                image = Image.open(BytesIO(qr_content))
+                st.image(image, caption='Your QR Code', use_column_width=True)
             
             # Set default file extension based on format
             if selected_format.upper() == 'JPEG':
