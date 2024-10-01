@@ -32,6 +32,11 @@ def create_qr_code(link, format='JPEG'):
         
         # Convert SVG to string
         svg_data = img.to_string()
+        
+        # Ensure svg_data is a string, decode if it's bytes
+        if isinstance(svg_data, bytes):
+            svg_data = svg_data.decode('utf-8')
+        
         return svg_data, 'image/svg+xml'
     
     else:
