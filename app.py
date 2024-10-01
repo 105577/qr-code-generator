@@ -1,15 +1,10 @@
 import streamlit as st
 import qrcode
 from PIL import Image
-import re
-import os
 from io import BytesIO
-import base64
-
-# Import SVG-related classes
 import qrcode.image.svg
 
-# Function to create QR code and return image bytes based on format
+# Function to create QR code and return image bytes or SVG string based on format
 def create_qr_code(link, format='JPEG'):
     # Dynamically select QR code version based on input length
     link_length = len(link)
@@ -35,9 +30,9 @@ def create_qr_code(link, format='JPEG'):
         qr.make(fit=True)
         img = qr.make_image()
         
-        # Convert SVG to string bytes
-        svg_bytes = img.to_string().encode('utf-8')
-        return svg_bytes, 'image/svg+xml'
+        # Convert SVG to string
+        svg_data = img.to_string()
+        return svg_data, 'image/svg+xml'
     
     else:
         # For PNG and JPEG formats
@@ -59,7 +54,7 @@ def create_qr_code(link, format='JPEG'):
         # Determine MIME type
         if format.upper() == 'PNG':
             mime_type = 'image/png'
-        elif format.upper() == 'JPEG' or format.upper() == 'JPG':
+        elif format.upper() in ['JPEG', 'JPG']:
             mime_type = 'image/jpeg'
         else:
             mime_type = 'image/png'  # Default MIME type
@@ -89,16 +84,21 @@ if st.button("Generate QR Code"):
             qr_content, mime_type = create_qr_code(link, format=selected_format)
             
             if selected_format.upper() == 'SVG':
-                # Display SVG directly in Streamlit
-                st.image(qr_content, caption='Your QR Code', use_column_width=True)
+                # Display SVG using markdown
+                st.markdown(f'<div>{qr_content}</div>', unsafe_allow_html=True)
             else:
                 # Display PNG or JPEG image
                 st.image(qr_content, caption='Your QR Code', use_column_width=True)
             
             # Set default file extension based on format
-            file_extension = 'jpg' if selected_format.upper() == 'JPEG' else selected_format.lower()
-            if selected_format.upper() == 'SVG':
+            if selected_format.upper() == 'JPEG':
+                file_extension = 'jpg'
+            elif selected_format.upper() == 'PNG':
+                file_extension = 'png'
+            elif selected_format.upper() == 'SVG':
                 file_extension = 'svg'
+            else:
+                file_extension = 'png'  # Default extension
             
             # Provide download button
             st.download_button(
